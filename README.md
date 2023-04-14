@@ -20,9 +20,9 @@ run on windows powershell:
 ```shell script
 $env:FLASK_APP = "Web/main.py"
 
-$env:FLASK_ENV = development
+$env:FLASK_ENV = "development"
 
-$env:FLASK_DEBUG = 1
+$env:FLASK_DEBUG = "1"
 
 python -m flask run --host 0.0.0.0 --port 19320
 ```
