@@ -11,10 +11,59 @@
         color: #4d4c4c46;
     }
 </style>
+
+    <script src="/static/jquery.min.js"></script>
+
+    <link href="/static/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <script src="/static/bootstrap.min.js"></script>
+
 </head>
 <body>
     <h1 class = "bling">AIBox</h1>
     <p class = "txt-trans">Your own AI assistant</p>
+
     <a href="https://github.com/">Download</a>
+
+    <div id="chat-box">
+
+
+    </div>
+
+    <textarea id="text-input" type="text" rows="6" style="width: 100%; resize: none"></textarea>
+    <button id="send">Chat</button>
+
 </body>
+
+<script>
+    function send(){
+            let text_input = $("#text-input")[0];
+            let chat_box = $("#chat-box")[0];
+            $.post("/chat",{
+                content: text_input.value
+            },
+            function(data, status){
+                chat_box.innerHTML += `<div style="color: #ff3333">
+                                        <span style="font-weight: bold">AI:</span>
+                                        ${data}
+                                    </div>
+                                  `;
+            });
+
+            chat_box.innerHTML += `<div style="color: #00aa22">
+                                        <span style="font-weight: bold">You:</span>
+                                        ${text_input.value}
+                                    </div>
+                                  `;
+            text_input.value = '';
+        }
+
+    $(document).ready(function() {
+        $("#send").click(send);
+        $("#text-input").keyup(function (e) {
+            if (e.keyCode === 13) send();
+        });
+    })
+</script>
+
+
 </html>
