@@ -6,7 +6,11 @@ import gpustat
 
 def init_gpu(require_num: int = 1):
     # this must be called before cuda initializing
-    gpu_list = gpustat.GPUStatCollection.new_query()
+    try:
+        gpu_list = gpustat.GPUStatCollection.new_query()
+    except Exception:
+        warnings.warn("GPU initialization failed.")
+        return None
     print(gpu_list)
     gpu_available = []
     for idx, gpu in enumerate(gpu_list):
