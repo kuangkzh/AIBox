@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>科技感前端页面</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            color: white;
+        }
+        #stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image: url('https://images.unsplash.com/photo-1524772085328-aa69f3b1dc78');
+            animation: moveStars 200s ease-in-out infinite;
+        }
+        @keyframes moveStars {
+            from {
+                background-position: 0 0;
+            }
+            to {
+                background-position: 0 -5000px;
+            }
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.7);
+        }
+        .nav {
+            display: flex;
+            align-items: center;
+        }
+        .nav li {
+            margin-left: 20px;
+            list-style: none;
+        }
+        .nav li a {
+            color: white;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-size: 16px;
+            transition: all 0.2s ease-in-out;
+        }
+        .nav li a:hover {
+            color: #3b5998;
+            transform: scale(1.2);
+        }
+        .banner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 500px;
+            background-image: url('https://images.unsplash.com/photo-1612429038265-a0e8044a37eb');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            text-align: center;
+            text-shadow: 0px 0px 5px rgba(0, 0, 0, 0.7);
+        }
+        .banner h2 {
+            font-size: 64px;
+            margin: 0;
+            padding: 0;
+            text-transform: uppercase;
+            letter-spacing: 5px;
+            color: #8f67ab;
+        }
+        .features {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            padding: 50px;
+        }
+        .feature {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 300px;
+            margin-bottom: 50px;
+            text-align: center;
+            transition: all 0.2s ease-in-out;
+        }
+        .feature:hover {
+            transform: scale(1.05);
+        }
+        .feature img {
+            width: 200px;
+            height: 200px;
+            margin-bottom: 20px;
+            border-radius: 50%;
+        }
+        .feature h3 {
+            font
+            -size: 32px;
+        margin: 0;
+        padding: 0;
+        text-transform: uppercase;
+        color: #8f67ab;
+    }
+    .feature p {
+        font-size: 18px;
+        line-height: 1.5;
+        margin: 0;
+        padding: 0;
+    }
+    .cta {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 300px;
+        background-color: rgba(255, 255, 255, 0.2);
+        text-align: center;
+    }
+    .cta h2 {
+        font-size: 48px;
+        margin: 0;
+        padding: 0;
+        text-transform: uppercase;
+        letter-spacing: 5px;
+        color: #8f67ab;
+    }
+    .cta button {
+        border: none;
+        outline: none;
+        padding: 10px 20px;
+        margin-top: 20px;
+        background-color: #8f67ab;
+        color: white;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.2s ease-in-out;
+    }
+    .cta button:hover {
+        background-color: #3b5998;
+        transform: scale(1.05);
+    }
+    .footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10px 20px;
+        background-color: rgba(255, 255, 255, 0.2);
+    }
+    .footer p {
+        margin: 0;
+        padding: 0;
+        font-size: 14px;
+    }
+    .footer a {
+        color: white;
+        text-decoration: none;
+        font-size: 14px;
+    }
+</style>
+</head>
+<body>
+    <div id="stars"></div>
+    <header class="header">
+        <div class="logo">LOGO</div>
+        <nav class="nav">
+            <ul>
+                <li><a href="#">Home</a></li>
+                <li><a href="#">Features</a></li>
+                <li><a href="#">Pricing</a></li>
+                <li><a href="#">Contact</a></li>
+            </ul>
+        </nav>
+    </header>
+    <section class="banner">
+        <h2>Welcome to AI Box</h2>
+        <p>Your own AI assistant</p>
+    </section>
+    <section class="features">
+        <div class="feature">
+            <img src="https://images.unsplash.com/photo-1518639192441-8fce0a3669c5">
+            <h3>Feature 1</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae libero blandit, euismod est a, luctus ex. Sed nec felis eu sem ultricies laoreet. </p>
+        </div>
+        <div class="feature">
+            <img src="https://images.unsplash.com/photo-1585795691428-2b380f9f7f0e">
+            <h3>Feature 2</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae libero blandit, euismod est a, luctus ex. Sed nec felis eu sem ultricies laoreet. </p>
+        </div>
+        <div class="feature">
+            <img src="https://images.unsplash.com/photo-1583340904236-4f119f5f6a5d">
+            <h3>Feature3</h3>
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Donec vitae libero blandit, euismod est a, luctus ex. Sed nec felis eu sem ultricies laoreet. </p>
+            </div>
+            </section>
+            <section class="cta">
+            <h2>Join us now and get a discount</h2>
+            <button>Sign Up Now</button>
+            </section>
+            <footer class="footer">
+            <p>© 2023 NexGenTech.</p>   <!--(Next Generation Technology)-->
+            <nav class="nav">
+            <ul>
+            <li><a href="#">Terms of Service</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Contact Us</a></li>
+            </ul>
+            </nav>
+            </footer>
+            <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+            <script>
+            $(document).ready(function() {
+            let $stars = $('#stars');
+            for (let i = 0; i < 100; i++) {
+            let $star = $('<div>').addClass('star');
+            let x = Math.floor(Math.random() * window.innerWidth);
+            let y = Math.floor(Math.random() * window.innerHeight);
+            let duration = Math.random() * 10 + 5;
+            let size = Math.random() * 3;
+
+            $star.css({
+                top: y,
+                left: x,
+                width: size + 'px',
+                height: size + 'px',
+                animationDuration: duration + 's'
+            });
+
+            $stars.append($star);
+        }
+    });
+</script>
+</body>
+</html>
