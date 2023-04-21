@@ -17,7 +17,8 @@ def main():
 
 @app.route('/chat', methods=['POST'])
 def chat():
-    content = request.form['content']
-    reply = OpenAssistant.forward(content)
-    reply = re.search(r"<\|assistant\|>(.*)(<\|endoftext\|>)?", reply).group(1)
-    return reply
+    inputs = request.form['dialog']
+    dialog = OpenAssistant.forward(inputs, max_new_tokens=150)
+    end = "<|endoftext|>" in dialog[len(inputs):]
+    reply = dialog[len(inputs):].replace("<|endoftext|>", "")
+    return {"reply": reply, "dialog": dialog, "ts": request.form['ts'], 'end': end}
