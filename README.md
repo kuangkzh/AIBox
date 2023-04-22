@@ -1,6 +1,21 @@
 # AIBox
 
 
+# Run
+
+linux:
+
+```shell script
+./setup.sh
+```
+
+windows:
+
+```shell script
+./startup.bat
+```
+
+
 # Debug Run
 
 Debug mode on windows cmd:
