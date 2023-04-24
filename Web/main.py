@@ -20,7 +20,7 @@ def feature():
     return render_template('feature.html')
 
 
-@app.route('/online')
+@app.route('/main')
 def online():
     return render_template('main.html')
 
