@@ -1,10 +1,11 @@
 import re
+import json
 
 from flask import Flask, render_template, request
 from utils import GPUs
 from Model import OpenAssistant
 
-GPUs.init_gpu()
+# GPUs.init_gpu()
 
 app = Flask(__name__)
 
@@ -17,6 +18,11 @@ def main():
 @app.route('/feature')
 def feature():
     return render_template('feature.html')
+
+
+@app.route('/online')
+def online():
+    return render_template('main.html')
 
 
 @app.route('/chat', methods=['POST'])
