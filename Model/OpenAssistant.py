@@ -12,12 +12,12 @@ def forward(input_text, max_new_tokens=200):
     global tokenizer, model
 
     if not tokenizer:
-        if not os.path.exists("/home/nlper_data/kuangzh/oasst-sft-4-pythia-12b-epoch-3.5"):
+        if not os.path.exists("/home/nlper_data/kuangzh/models/oasst-sft-4-pythia-12b-epoch-3.5"):
             warnings.warn("The OpenAssistant model is not found, skipping...")
             return ""
 
-        tokenizer = AutoTokenizer.from_pretrained("/home/nlper_data/kuangzh/oasst-sft-4-pythia-12b-epoch-3.5", cache_dir='cache')
-        model = GPTNeoXForCausalLM.from_pretrained("/home/nlper_data/kuangzh/oasst-sft-4-pythia-12b-epoch-3.5", device_map="auto", load_in_8bit=True, cache_dir='cache')
+        tokenizer = AutoTokenizer.from_pretrained("/home/nlper_data/kuangzh/models/oasst-sft-4-pythia-12b-epoch-3.5", cache_dir='cache')
+        model = GPTNeoXForCausalLM.from_pretrained("/home/nlper_data/kuangzh/models/oasst-sft-4-pythia-12b-epoch-3.5", device_map="auto", load_in_8bit=True, cache_dir='cache')
         model.eval()
 
     with torch.no_grad():

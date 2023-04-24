@@ -2,6 +2,7 @@ import os
 import torch
 import warnings
 import gpustat
+from pynvml import *
 
 
 def init_gpu(require_num: int = 1):
@@ -22,3 +23,10 @@ def init_gpu(require_num: int = 1):
     else:
         warnings.warn("Not enough GPU available now")
         return None
+
+
+def print_gpu_utilization(i):
+    nvmlInit()
+    handle = nvmlDeviceGetHandleByIndex(i)
+    info = nvmlDeviceGetMemoryInfo(handle)
+    print(f"GPU memory occupied: {info.used//1024**2} MB.")
