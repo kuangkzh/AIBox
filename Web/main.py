@@ -1,12 +1,13 @@
 import re
 import json
+import os
 
 from flask import Flask, render_template, request
 from utils import GPUs
 from Model import OpenAssistant
 
 # GPUs.init_gpu()
-
+basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
 
 
@@ -25,10 +26,22 @@ def online():
     return render_template('main.html')
 
 
+@app.route('/picture', methods=['POST'])
+def picture():
+    img = request.form.get('file')
+    path = basedir + "/static/img/"
+    img_name = img.filename
+    file_path = path + img_name
+    img.save(file_path)
+    url = '/static/img/' + img_name
+    return url
+
+
 @app.route('/chat', methods=['POST'])
 def chat():
     inputs = request.form['dialog']
-    dialog = OpenAssistant.forward(inputs, max_new_tokens=150)
+    # dialog = OpenAssistant.forward(inputs, max_new_tokens=150)
+    dialog = "1111"
     end = "<|endoftext|>" in dialog[len(inputs):]
     reply = dialog[len(inputs):].replace("<|endoftext|>", "")
     return {"reply": reply, "dialog": dialog, "ts": request.form['ts'], 'end': end}
