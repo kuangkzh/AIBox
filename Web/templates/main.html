@@ -34,19 +34,22 @@
 			font-size: 24px;
 			text-align: center;
 		}
+        .hhh{
+            color:antiquewhite;
+        }
 	</style>
 </head>
 <body>
     <div id="chat-box">
     <div id="stars"></div>
-    <div class="container">
-        <h1>AI Box</h1>
-        <p>Your own AI assistant</p>
-    </div>
-
+    <p class="container">Please enter your instructions in the text box above.</p>
     <textarea id="text-input" type="text" rows="6" style="width: 100%; resize: none"></textarea>
     <button id="send">Chat</button>
-    <p class="container">Please enter your instructions in the text box above. </p>
+    <p class="container"> If you want to upload pictures, please put it into the picture box below</p>
+    <form>
+        <input type="file" id="file-input" color="white">
+        <button type="submit" id="upload-button">上传</button>
+      </form>
 </body>
 <script>
     let dialog = "";
@@ -104,5 +107,31 @@
             if (e.keyCode === 13) send();
         });
     })
+</script>
+<script>
+    const uploadButton = document.getElementById('upload-button');
+    const fileInput = document.getElementById('file-input');
+    uploadButton.addEventListener('click',()=>{
+        console.log('上传按钮被点击了')
+    })
+    uploadButton.addEventListener('click', () => {
+        const file = fileInput.files[0];
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', '/upload');
+        xhr.onload = () => {
+            if (xhr.status === 200) {
+            const imageUrl = xhr.responseText;
+            const imageElement = document.createElement('img');
+            imageElement.src = imageUrl;
+            imageContainer.appendChild(imageElement);
+            } else {
+            console.error('上传失败！');
+            }
+        };
+        xhr.send(formData);
+    });
 </script>
 </html>
