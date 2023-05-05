@@ -26,7 +26,7 @@ def online():
     return render_template('main.html')
 
 
-@app.route('/picture', methods=['POST'])
+@app.route('/upload', methods=['POST'])
 def picture():
     img = request.form.get('file')
     path = basedir + "/static/img/"
