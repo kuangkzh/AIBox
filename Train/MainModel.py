@@ -4,11 +4,12 @@ import torch
 from torch import nn
 from torch.nn import LayerNorm
 from transformers.models.bloom.modeling_bloom import BloomBlock, BloomModel, BloomForCausalLM
-from transformers import AutoTokenizer, AutoModelForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig
 
 
 tokenizer = AutoTokenizer.from_pretrained("/home/nlper_data/kuangzh/models/YeungNLP/firefly-1b4")
-model = AutoModelForCausalLM.from_pretrained("/home/nlper_data/kuangzh/models/YeungNLP/firefly-1b4", device_map="auto", torch_dtype=torch.float16).to("cuda")
+bloom_model = AutoModelForCausalLM.from_pretrained("/home/nlper_data/kuangzh/models/YeungNLP/firefly-1b4", device_map="auto", torch_dtype=torch.float16).to("cuda")
+config = bloom_model.config
 
 
 class MainModelAttention(nn.Module):
@@ -102,3 +103,17 @@ class MainModel(BloomModel):
 
         # Initialize weights and apply final processing
         self.post_init()
+
+    def load_from_bloom(self, bloom_model):
+        self.load_state_dict(bloom_model.state_dict())
+
+
+class MainModelForCausalLM(BloomForCausalLM):
+    def __init__(self, config):
+        super().__init__(config)
+        self.transformer = MainModel(config)
+        self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
+        self.post_init()
+
+    def load_from_bloom(self, bloom_causal_lm_model):
+        self.load_state_dict(bloom_causal_lm_model.state_dict())
