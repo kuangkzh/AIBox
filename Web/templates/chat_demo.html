@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="/static/jquery.min.js"></script>
+</head>
+<body>
+<script>
+    function chat(e) {
+        $.post("/chat_api",
+            {
+                "message": $("#inputs")[0].value
+            },
+            function (data, status) {
+                console.log(data, status);
+                $("#dialog")[0].innerHTML += data['reply'];
+            }
+        )
+    }
+</script>
+
+<div id="dialog"></div>
+
+<textarea id="inputs" style="width: 100%"></textarea>
+<button onclick="chat(event)">发送</button>
+
+</body>
+</html>

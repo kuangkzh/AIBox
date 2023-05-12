@@ -6,9 +6,12 @@ from flask import Flask, render_template, request
 from utils import GPUs
 from Model import OpenAssistant
 
+import Web.chat_demo
+
 # GPUs.init_gpu()
 basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
+app.register_blueprint(Web.chat_demo.app)
 
 
 @app.route('/')
