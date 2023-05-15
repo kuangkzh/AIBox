@@ -1,6 +1,7 @@
 import re
 import json
 import os
+from PIL import Image
 
 from flask import Flask, render_template, request
 from utils import GPUs
@@ -45,3 +46,7 @@ def chat():
     end = "<|endoftext|>" in dialog[len(inputs):]
     reply = dialog[len(inputs):].replace("<|endoftext|>", "")
     return {"reply": reply, "dialog": dialog, "ts": request.form['ts'], 'end': end}
+
+
+if __name__ == "__main__":
+    app.run()
