@@ -10,15 +10,15 @@
       flex-wrap: nowrap;
       overflow-x: auto;
     }
-.slot {
-  width: calc(20% - 10px);
-  margin: 5px;
-  height: 0;
-  padding-bottom: calc(20% - 10px);
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: contain;
-}
+    .slot {
+      width: calc(20% - 10px);
+      margin: 5px;
+      height: 0;
+      padding-bottom: calc(20% - 10px);
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
+    }
   </style>
 </head>
 <body>
@@ -27,7 +27,7 @@
   <div class="slot" id="slot3"></div>
   <div class="slot" id="slot4"></div>
   <div class="slot" id="slot5"></div>
-  <input type="file" id="file-input">
+  <input type="file" id="file-input" style="display: none" name="upload">
   <script>
     const fileInput = document.getElementById("file-input");
     const slots = document.querySelectorAll(".slot");

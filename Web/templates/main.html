@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>use online</title>
-	<style>
-		body {
+  <title>图片展示</title>
+  <style>
+    body {
       margin: 0;
       padding: 0;
       display: flex;
@@ -11,15 +11,15 @@
       overflow-x: auto;
     }
     .slot {
-    width: calc(20% - 10px);
-    margin: 5px;
-    height: 0;
-    padding-bottom: calc(20% - 10px);
-    background-position: center;
-    background-repeat: no-repeat;
-    background-size: contain;
+      width: calc(20% - 10px);
+      margin: 5px;
+      height: 0;
+      padding-bottom: calc(20% - 10px);
+      background-position: center;
+      background-repeat: no-repeat;
+      background-size: contain;
     }
-		#stars {
+    #stars {
 			position: fixed;
 			top: 0;
 			left: 0;
@@ -45,72 +45,67 @@
 			font-size: 24px;
 			text-align: center;
 		}
-        .hhh{
-            color:antiquewhite;
-        }
-	</style>
+    .hhh{
+        color:antiquewhite;
+    }
+  </style>
 </head>
 <body>
-    <div id="chat-box">
-    <div id="stars"></div>
-    <p class="container">Please enter your instructions in the text box above.</p>
-    <textarea id="text-input" type="text" rows="6" style="width: 100%; resize: none"></textarea>
-    <button id="send">Chat</button>
-    <p class="container"> If you want to upload pictures, please put it into the picture box below</p>
-    <body>
-        <div class="slot" id="slot1"></div>
-        <div class="slot" id="slot2"></div>
-        <div class="slot" id="slot3"></div>
-        <div class="slot" id="slot4"></div>
-        <div class="slot" id="slot5"></div>
-        <input type="file" id="file-input">
-        <script>
-          const fileInput = document.getElementById("file-input");
-          const slots = document.querySelectorAll(".slot");
-          const usedSlots = new Set();
-          
-          fileInput.addEventListener("change", (event) => {
-            const file = event.target.files[0];
-            if (!file) return;
-            
-            const slot = getAvailableSlot();
-            if (!slot) return;
-            
-            const reader = new FileReader();
-            reader.addEventListener("load", (event) => {
-              slot.style.backgroundImage = `url('${event.target.result}')`;
-              
-              const formData = new FormData();
-              formData.append("file", file);
-              fetch('/upload', {
-                method: 'POST',
-                body: formData
-              }).then(response => {
-                if (response.ok) {
-                  console.log('文件已上传到服务器');
-                } else {
-                  console.error('上传文件时出错');
-                }
-              }).catch(error => {
-                console.error('上传文件时出错', error);
-              });
-            });
-            reader.readAsDataURL(file);
-          });
-          
-          function getAvailableSlot() {
-            for (const slot of slots) {
-              if (!usedSlots.has(slot)) {
-                usedSlots.add(slot);
-                return slot;
-              }
-            }
-            return null;
+  <div id="chat-box">
+  <div id="stars"></div>
+  <p class="container">Please enter your instructions in the text box above.</p>
+  <textarea id="text-input" type="text" rows="6" style="width: 100%; resize: none"></textarea>
+  <button id="send">Chat</button>
+  <p class="container"> If you want to upload pictures, please put it into the picture box below</p>
+  <input type="file" id="file-input"> 
+  <div class="slot" id="slot1"></div>
+  <div class="slot" id="slot2"></div>
+  <div class="slot" id="slot3"></div>
+  <div class="slot" id="slot4"></div>
+  <div class="slot" id="slot5"></div>
+  <script>
+    const fileInput = document.getElementById("file-input");
+    const slots = document.querySelectorAll(".slot");
+    const usedSlots = new Set();
+    
+    fileInput.addEventListener("change", (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      const slot = getAvailableSlot();
+      if (!slot) return;
+      
+      const reader = new FileReader();
+      reader.addEventListener("load", (event) => {
+        slot.style.backgroundImage = `url('${event.target.result}')`;
+        
+        const formData = new FormData();
+        formData.append("file", file);
+        fetch('/upload', {
+          method: 'POST',
+          body: formData
+        }).then(response => {
+          if (response.ok) {
+            console.log('文件已上传到服务器');
+          } else {
+            console.error('上传文件时出错');
           }
-        </script>
-      </body>
-</body>
-<script>
+        }).catch(error => {
+          console.error('上传文件时出错', error);
+        });
+      });
+      reader.readAsDataURL(file);
+    });
+    
+    function getAvailableSlot() {
+      for (const slot of slots) {
+        if (!usedSlots.has(slot)) {
+          usedSlots.add(slot);
+          return slot;
+        }
+      }
+      return null;
+    }
     let dialog = "";
     let chat_box = $("#chat-box")[0];
 
@@ -125,7 +120,6 @@
             }, receive);
         }
     }
-
     function receive_first(data, status){
         chat_box.innerHTML += `<div id="${data['ts']}" style="color: #ff3333">
                                     <span style="font-weight: bold">AI:</span>
@@ -141,7 +135,6 @@
             }, receive);
         }
     }
-
     function send(){
             let text_input = $("#text-input")[0];
 
@@ -166,5 +159,6 @@
             if (e.keyCode === 13) send();
         });
     })
-</script>
-</html>
+  </script>
+</body>
+</html> 
