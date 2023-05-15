@@ -1,7 +1,6 @@
 import re
 import json
 import os
-from PIL import Image
 
 from flask import Flask, render_template, request
 from utils import GPUs
