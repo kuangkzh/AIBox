@@ -6,9 +6,12 @@ from flask import Flask, render_template, request
 from utils import GPUs
 from Model import OpenAssistant
 
+import Web.chat_demo
+
 # GPUs.init_gpu()
 basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
+app.register_blueprint(Web.chat_demo.app)
 
 
 @app.route('/')
@@ -28,7 +31,7 @@ def online():
 
 @app.route('/upload', methods=['POST'])
 def picture():
-    img = request.form.get('file')
+    img = request.files.get('file')
     path = basedir + "/static/img/"
     img_name = img.filename
     file_path = path + img_name
@@ -40,8 +43,12 @@ def picture():
 @app.route('/chat', methods=['POST'])
 def chat():
     inputs = request.form['dialog']
-    # dialog = OpenAssistant.forward(inputs, max_new_tokens=150)
-    dialog = "1111"
+    dialog = OpenAssistant.forward(inputs, max_new_tokens=150)
+    # dialog = "1111"
     end = "<|endoftext|>" in dialog[len(inputs):]
     reply = dialog[len(inputs):].replace("<|endoftext|>", "")
     return {"reply": reply, "dialog": dialog, "ts": request.form['ts'], 'end': end}
+
+
+if __name__ == "__main__":
+    app.run()
