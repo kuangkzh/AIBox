@@ -4,10 +4,21 @@
 	<title>use online</title>
 	<style>
 		body {
-			margin: 0;
-			padding: 0;
-			background-color: black;
-		}
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+    }
+    .slot {
+    width: calc(20% - 10px);
+    margin: 5px;
+    height: 0;
+    padding-bottom: calc(20% - 10px);
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: contain;
+    }
 		#stars {
 			position: fixed;
 			top: 0;
@@ -46,7 +57,58 @@
     <textarea id="text-input" type="text" rows="6" style="width: 100%; resize: none"></textarea>
     <button id="send">Chat</button>
     <p class="container"> If you want to upload pictures, please put it into the picture box below</p>
-    <iframe src="./image_frame.html" width="100%" height="500px" frameborder="0"></iframe>
+    <body>
+        <div class="slot" id="slot1"></div>
+        <div class="slot" id="slot2"></div>
+        <div class="slot" id="slot3"></div>
+        <div class="slot" id="slot4"></div>
+        <div class="slot" id="slot5"></div>
+        <input type="file" id="file-input">
+        <script>
+          const fileInput = document.getElementById("file-input");
+          const slots = document.querySelectorAll(".slot");
+          const usedSlots = new Set();
+          
+          fileInput.addEventListener("change", (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const slot = getAvailableSlot();
+            if (!slot) return;
+            
+            const reader = new FileReader();
+            reader.addEventListener("load", (event) => {
+              slot.style.backgroundImage = `url('${event.target.result}')`;
+              
+              const formData = new FormData();
+              formData.append("file", file);
+              fetch('/upload', {
+                method: 'POST',
+                body: formData
+              }).then(response => {
+                if (response.ok) {
+                  console.log('文件已上传到服务器');
+                } else {
+                  console.error('上传文件时出错');
+                }
+              }).catch(error => {
+                console.error('上传文件时出错', error);
+              });
+            });
+            reader.readAsDataURL(file);
+          });
+          
+          function getAvailableSlot() {
+            for (const slot of slots) {
+              if (!usedSlots.has(slot)) {
+                usedSlots.add(slot);
+                return slot;
+              }
+            }
+            return null;
+          }
+        </script>
+      </body>
 </body>
 <script>
     let dialog = "";
