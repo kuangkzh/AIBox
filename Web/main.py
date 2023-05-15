@@ -35,9 +35,6 @@ def picture():
     path = basedir + "/static/img/"
     img_name = img.filename
     file_path = path + img_name
-    print(path, file_path)
-    print(os.path.exists(path))
-    print(os.listdir())
     img.save(file_path)
     url = '/static/img/' + img_name
     return url
@@ -46,8 +43,8 @@ def picture():
 @app.route('/chat', methods=['POST'])
 def chat():
     inputs = request.form['dialog']
-    # dialog = OpenAssistant.forward(inputs, max_new_tokens=150)
-    dialog = "1111"
+    dialog = OpenAssistant.forward(inputs, max_new_tokens=150)
+    # dialog = "1111"
     end = "<|endoftext|>" in dialog[len(inputs):]
     reply = dialog[len(inputs):].replace("<|endoftext|>", "")
     return {"reply": reply, "dialog": dialog, "ts": request.form['ts'], 'end': end}
