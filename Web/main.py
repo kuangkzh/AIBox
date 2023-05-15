@@ -31,10 +31,13 @@ def online():
 
 @app.route('/upload', methods=['POST'])
 def picture():
-    img = request.form.get('file')
+    img = request.files.get('file')
     path = basedir + "/static/img/"
     img_name = img.filename
     file_path = path + img_name
+    print(path, file_path)
+    print(os.path.exists(path))
+    print(os.listdir())
     img.save(file_path)
     url = '/static/img/' + img_name
     return url
