@@ -223,8 +223,29 @@ class MainModel(BloomModel):
         # Initialize weights and apply final processing
         self.post_init()
 
-    def load_from_bloom(self, bloom_model):
-        self.load_state_dict(bloom_model.state_dict())
+    def load_from_bloom(self, bloom_model, init_std=0.0):
+        match_res = self.load_state_dict(bloom_model.state_dict(), strict=False)
+        warnings.warn("Load Result:")
+        print(match_res)
+        # 初始化lora层
+        for block in self.h:
+            nn.init.normal_(block.lora_input.weight, mean=0, std=init_std)
+            nn.init.normal_(block.lora_output.weight, mean=0, std=init_std)
+            # 初始化偏置
+            nn.init.zeros_(block.lora_input.bias)
+            nn.init.zeros_(block.lora_output.bias)
+
+            # nn.init.xavier_uniform_(block.cross_attention.in_proj_weight)
+            # nn.init.xavier_uniform_(block.cross_attention.out_proj.weight)
+            nn.init.normal_(block.cross_attention.in_proj_weight, mean=0, std=init_std)
+            nn.init.normal_(block.cross_attention.out_proj.weight, mean=0, std=init_std)
+            nn.init.constant_(block.cross_attention.in_proj_bias, 0)
+            nn.init.constant_(block.cross_attention.out_proj.bias, 0)
+
+            # nn.init.normal_(block.cross_mlp.dense_h_to_4h.weight, mean=0, std=init_std)
+            # nn.init.normal_(block.cross_mlp.dense_4h_to_h.weight, mean=0, std=init_std)
+            # nn.init.zeros_(block.cross_mlp.dense_h_to_4h.bias)
+            # nn.init.zeros_(block.cross_mlp.dense_4h_to_h.bias)
 
     def forward(
             self,
@@ -375,29 +396,9 @@ class MainModelForCausalLM(BloomForCausalLM):
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
         self.post_init()
 
-    def load_from_bloom(self, bloom_causal_lm_model):
-        match_res = self.load_state_dict(bloom_causal_lm_model.state_dict(), strict=False)
-        warnings.warn("Load Result:")
-        print(match_res)
-        # 初始化lora层
-        for block in self.transformer.h:
-            nn.init.normal_(block.lora_input.weight, mean=0, std=0.0)
-            nn.init.normal_(block.lora_output.weight, mean=0, std=0.0)
-            # 初始化偏置
-            nn.init.zeros_(block.lora_input.bias)
-            nn.init.zeros_(block.lora_output.bias)
-
-            # nn.init.xavier_uniform_(block.cross_attention.in_proj_weight)
-            # nn.init.xavier_uniform_(block.cross_attention.out_proj.weight)
-            nn.init.normal_(block.cross_attention.in_proj_weight, mean=0, std=0.0)
-            nn.init.normal_(block.cross_attention.out_proj.weight, mean=0, std=0.0)
-            nn.init.constant_(block.cross_attention.in_proj_bias, 0)
-            nn.init.constant_(block.cross_attention.out_proj.bias, 0)
-
-            # nn.init.normal_(block.cross_mlp.dense_h_to_4h.weight, mean=0, std=0.0)
-            # nn.init.normal_(block.cross_mlp.dense_4h_to_h.weight, mean=0, std=0.0)
-            # nn.init.zeros_(block.cross_mlp.dense_h_to_4h.bias)
-            # nn.init.zeros_(block.cross_mlp.dense_4h_to_h.bias)
+    def load_from_bloom(self, bloom_causal_lm_model, init_std=0.0):
+        self.transformer.load_from_bloom(bloom_causal_lm_model.transformer, init_std)
+        self.lm_head.load_state_dict(bloom_causal_lm_model.lm_head.state_dict(), strict=False)
 
     def forward(
             self,
