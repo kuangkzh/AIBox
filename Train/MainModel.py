@@ -375,10 +375,36 @@ class MainModelForCausalLM(BloomForCausalLM):
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
         self.post_init()
 
-    def load_from_bloom(self, bloom_causal_lm_model):
+    def init_tokenizer(self):
+        new_tokens = ["<|prompter|>", "<|assistant|>", "<|call|>", "<|end|>", "<|endofcall|>"]
+        # 交集为空
+        assert len(set(new_tokens) & set(tokenizer.vocab.keys())) == 0
+        tokenizer.add_tokens(new_tokens)
+
+        # 获取<s>和new_token的索引
+        bos_index = tokenizer.convert_tokens_to_ids('<s>')
+        prompter_index = tokenizer.convert_tokens_to_ids('<|prompter|>')
+        assistant_index = tokenizer.convert_tokens_to_ids("<|assistant|>")
+
+        eos_index = tokenizer.convert_tokens_to_ids('</s>')
+        end_index = tokenizer.convert_tokens_to_ids('<|end|>')
+
+        # model = AutoModelForCausalLM.from_pretrained("/home/nlper_data/kuangzh/models/YeungNLP/firefly-1b4", device_map="auto", torch_dtype=torch.float16).to("cuda")
+        self.resize_token_embeddings(len(tokenizer))
+
+        # 将<s>的embedding迁移到new_token
+        self.transformer.word_embeddings.weight.data[prompter_index] = self.transformer.word_embeddings.weight.data[
+            bos_index].clone()
+        self.transformer.word_embeddings.weight.data[end_index] = self.transformer.word_embeddings.weight.data[
+            eos_index].clone()
+        self.transformer.word_embeddings.weight.data[assistant_index] = self.transformer.word_embeddings.weight.data[
+            eos_index].clone()
+
+    def load_from_bloom(self, bloom_causal_lm_model=bloom_model):
         match_res = self.load_state_dict(bloom_causal_lm_model.state_dict(), strict=False)
         warnings.warn("Load Result:")
         print(match_res)
+        self.init_tokenizer()
         # 初始化lora层
         for block in self.transformer.h:
             nn.init.normal_(block.lora_input.weight, mean=0, std=0.0)
