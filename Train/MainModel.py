@@ -5,6 +5,7 @@ import torch
 from torch import nn
 from torch.nn import LayerNorm
 # from transformers.models.bloom.modeling_bloom import BloomBlock, BloomModel, BloomForCausalLM
+from dataclasses import dataclass
 from transformers.models.bloom.modeling_bloom import (
     BloomBlock, BloomModel, BloomForCausalLM, BloomConfig, \
     BloomAttention, BloomGelu, BloomMLP, Optional, Tuple,
@@ -223,8 +224,29 @@ class MainModel(BloomModel):
         # Initialize weights and apply final processing
         self.post_init()
 
-    def load_from_bloom(self, bloom_model):
-        self.load_state_dict(bloom_model.state_dict())
+    def load_from_bloom(self, bloom_model, init_std=0.0):
+        match_res = self.load_state_dict(bloom_model.state_dict(), strict=False)
+        warnings.warn("Load Result:")
+        print(match_res)
+        # 初始化lora层
+        for block in self.h:
+            nn.init.normal_(block.lora_input.weight, mean=0, std=init_std)
+            nn.init.normal_(block.lora_output.weight, mean=0, std=init_std)
+            # 初始化偏置
+            nn.init.zeros_(block.lora_input.bias)
+            nn.init.zeros_(block.lora_output.bias)
+
+            # nn.init.xavier_uniform_(block.cross_attention.in_proj_weight)
+            # nn.init.xavier_uniform_(block.cross_attention.out_proj.weight)
+            nn.init.normal_(block.cross_attention.in_proj_weight, mean=0, std=init_std)
+            nn.init.normal_(block.cross_attention.out_proj.weight, mean=0, std=init_std)
+            nn.init.constant_(block.cross_attention.in_proj_bias, 0)
+            nn.init.constant_(block.cross_attention.out_proj.bias, 0)
+
+            # nn.init.normal_(block.cross_mlp.dense_h_to_4h.weight, mean=0, std=init_std)
+            # nn.init.normal_(block.cross_mlp.dense_4h_to_h.weight, mean=0, std=init_std)
+            # nn.init.zeros_(block.cross_mlp.dense_h_to_4h.bias)
+            # nn.init.zeros_(block.cross_mlp.dense_4h_to_h.bias)
 
     def forward(
             self,
@@ -375,55 +397,9 @@ class MainModelForCausalLM(BloomForCausalLM):
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
         self.post_init()
 
-    def init_tokenizer(self):
-        new_tokens = ["<|prompter|>", "<|assistant|>", "<|call|>", "<|end|>", "<|endofcall|>"]
-        # 交集为空
-        assert len(set(new_tokens) & set(tokenizer.vocab.keys())) == 0
-        tokenizer.add_tokens(new_tokens)
-
-        # 获取<s>和new_token的索引
-        bos_index = tokenizer.convert_tokens_to_ids('<s>')
-        prompter_index = tokenizer.convert_tokens_to_ids('<|prompter|>')
-        assistant_index = tokenizer.convert_tokens_to_ids("<|assistant|>")
-
-        eos_index = tokenizer.convert_tokens_to_ids('</s>')
-        end_index = tokenizer.convert_tokens_to_ids('<|end|>')
-
-        # model = AutoModelForCausalLM.from_pretrained("/home/nlper_data/kuangzh/models/YeungNLP/firefly-1b4", device_map="auto", torch_dtype=torch.float16).to("cuda")
-        self.resize_token_embeddings(len(tokenizer))
-
-        # 将<s>的embedding迁移到new_token
-        self.transformer.word_embeddings.weight.data[prompter_index] = self.transformer.word_embeddings.weight.data[
-            bos_index].clone()
-        self.transformer.word_embeddings.weight.data[end_index] = self.transformer.word_embeddings.weight.data[
-            eos_index].clone()
-        self.transformer.word_embeddings.weight.data[assistant_index] = self.transformer.word_embeddings.weight.data[
-            eos_index].clone()
-
-    def load_from_bloom(self, bloom_causal_lm_model=bloom_model):
-        match_res = self.load_state_dict(bloom_causal_lm_model.state_dict(), strict=False)
-        warnings.warn("Load Result:")
-        print(match_res)
-        self.init_tokenizer()
-        # 初始化lora层
-        for block in self.transformer.h:
-            nn.init.normal_(block.lora_input.weight, mean=0, std=0.0)
-            nn.init.normal_(block.lora_output.weight, mean=0, std=0.0)
-            # 初始化偏置
-            nn.init.zeros_(block.lora_input.bias)
-            nn.init.zeros_(block.lora_output.bias)
-
-            # nn.init.xavier_uniform_(block.cross_attention.in_proj_weight)
-            # nn.init.xavier_uniform_(block.cross_attention.out_proj.weight)
-            nn.init.normal_(block.cross_attention.in_proj_weight, mean=0, std=0.0)
-            nn.init.normal_(block.cross_attention.out_proj.weight, mean=0, std=0.0)
-            nn.init.constant_(block.cross_attention.in_proj_bias, 0)
-            nn.init.constant_(block.cross_attention.out_proj.bias, 0)
-
-            # nn.init.normal_(block.cross_mlp.dense_h_to_4h.weight, mean=0, std=0.0)
-            # nn.init.normal_(block.cross_mlp.dense_4h_to_h.weight, mean=0, std=0.0)
-            # nn.init.zeros_(block.cross_mlp.dense_h_to_4h.bias)
-            # nn.init.zeros_(block.cross_mlp.dense_4h_to_h.bias)
+    def load_from_bloom(self, bloom_causal_lm_model, init_std=0.0):
+        self.transformer.load_from_bloom(bloom_causal_lm_model.transformer, init_std)
+        self.lm_head.load_state_dict(bloom_causal_lm_model.lm_head.state_dict(), strict=False)
 
     def forward(
             self,
@@ -499,6 +475,38 @@ class MainModelForCausalLM(BloomForCausalLM):
             loss=loss,
             logits=lm_logits,
             past_key_values=transformer_outputs.past_key_values,
-            hidden_states=transformer_outputs.hidden_states,
+            hidden_states=hidden_states,
             attentions=transformer_outputs.attentions,
+        )
+
+
+@dataclass
+class CausalLMOutputWithCrossAttentionsAndRLHF(CausalLMOutputWithCrossAttentions):
+    score_correct: torch.FloatTensor = None
+    score_helpful: torch.FloatTensor = None
+    score_saving: torch.FloatTensor = None
+    score_ethical: torch.FloatTensor = None
+
+
+class MainModelForCausalLMWithRLHF(MainModelForCausalLM):
+    def __init__(self, config):
+        super().__init__(config)
+        self.rlhf = nn.Linear(config.hidden_size, 4)
+        self.post_init()
+
+    def forward(self, *args, **kwargs) -> Union[Tuple[torch.Tensor], CausalLMOutputWithCrossAttentions]:
+        output = super().forward(*args, **kwargs)
+
+        scores = self.rlhf(output.hidden_states)
+
+        return CausalLMOutputWithCrossAttentionsAndRLHF(
+            loss=output.loss,
+            logits=output.lm_logits,
+            past_key_values=output.past_key_values,
+            hidden_states=output.hidden_states,
+            attentions=output.attentions,
+            score_correct=scores[..., 0],
+            score_helpful=scores[..., 1],
+            score_saving=scores[..., 2],
+            score_ethical=scores[..., 3]
         )
