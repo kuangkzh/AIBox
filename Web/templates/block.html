@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>页面框架</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      margin: 0;
+    }
+    
+    #left-panel {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    #text-dialog {
+      flex-grow: 1;
+      overflow-y: auto;
+      border: 1px solid black;
+    }
+    
+    #picture-slot {
+      flex-grow: 1;
+      border: 1px solid black;
+    }
+    
+    #right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .image-box {
+      flex-grow: 1;
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <div id="left-panel">
+    <div id="text-dialog">
+      <iframe 
+      width="1200"
+      height="460"
+      src="chatblock.html"></iframe>
+    </div>
+    <div id="picture-slot">
+      <iframe 
+      width="1200"
+      height="240"
+      src="pictureblock.html"></iframe>
+    </div>
+  </div>
+  <div id="right-panel">
+    <!---web slot--->
+  </div>
+</body>
+</html>
