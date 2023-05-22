@@ -1,6 +1,6 @@
 from transformers import AutoTokenizer, AutoModel, AutoProcessor
 import re
-import ImageCaptioning 
+import ImageCaptioning, Browser, SpeechRecognition, TextToImage, TextToVideo, VisualQuestionAnswering
 
 class Controller:
     def __call__(self, input_str):
@@ -9,6 +9,15 @@ class Controller:
         
         if self.model_name == "vit-gpt2-image-captioning":
             return(ImageCaptioning.vit_gpt2_image_captioning(self.model_args))
+        if self.model_name == "whisper-base":
+            return(SpeechRecognition.whisper_base(self.model_args))
+        if self.model_name == "stable-diffusion-v1-5":
+            return(TextToImage.stable_diffusion_v1_5(self.model_args))
+        if self.model_name == "text-to-video-ms-1.7b":
+            return(TextToVideo.text_to_video(self.model_args))
+        if self.model_name == "vilt-b32-finetuned-vqa":
+            return(VisualQuestionAnswering.visual_question_answer(self.model_args))
+        
         # return("model name: {}; model args: {}.".format(self.model_name, self.model_args))
   
         
