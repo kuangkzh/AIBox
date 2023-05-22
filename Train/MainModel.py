@@ -5,6 +5,7 @@ import torch
 from torch import nn
 from torch.nn import LayerNorm
 # from transformers.models.bloom.modeling_bloom import BloomBlock, BloomModel, BloomForCausalLM
+from dataclasses import dataclass
 from transformers.models.bloom.modeling_bloom import (
     BloomBlock, BloomModel, BloomForCausalLM, BloomConfig, \
     BloomAttention, BloomGelu, BloomMLP, Optional, Tuple,
@@ -474,6 +475,38 @@ class MainModelForCausalLM(BloomForCausalLM):
             loss=loss,
             logits=lm_logits,
             past_key_values=transformer_outputs.past_key_values,
-            hidden_states=transformer_outputs.hidden_states,
+            hidden_states=hidden_states,
             attentions=transformer_outputs.attentions,
+        )
+
+
+@dataclass
+class CausalLMOutputWithCrossAttentionsAndRLHF(CausalLMOutputWithCrossAttentions):
+    score_correct: torch.FloatTensor = None
+    score_helpful: torch.FloatTensor = None
+    score_saving: torch.FloatTensor = None
+    score_ethical: torch.FloatTensor = None
+
+
+class MainModelForCausalLMWithRLHF(MainModelForCausalLM):
+    def __init__(self, config):
+        super().__init__(config)
+        self.rlhf = nn.Linear(config.hidden_size, 4)
+        self.post_init()
+
+    def forward(self, *args, **kwargs) -> Union[Tuple[torch.Tensor], CausalLMOutputWithCrossAttentions]:
+        output = super().forward(*args, **kwargs)
+
+        scores = self.rlhf(output.hidden_states)
+
+        return CausalLMOutputWithCrossAttentionsAndRLHF(
+            loss=output.loss,
+            logits=output.lm_logits,
+            past_key_values=output.past_key_values,
+            hidden_states=output.hidden_states,
+            attentions=output.attentions,
+            score_correct=scores[..., 0],
+            score_helpful=scores[..., 1],
+            score_saving=scores[..., 2],
+            score_ethical=scores[..., 3]
         )
