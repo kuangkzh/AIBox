@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>图片展示</title>
+</head>
+<body>
+  <div id="chat-box">
+  <textarea id="text-input" type="text" rows="26" style="width: 100%; resize: none"></textarea>
+  <button id="send">Chat</button>
+  <script>
+    let dialog = "";
+    let chat_box = $("#chat-box")[0];
+
+    function receive(data, status) {
+        $("#" + data['ts'])[0].innerHTML += data['reply'];
+
+        dialog = data['dialog'];
+        if (!data['end']) {
+                $.post("/chat",{
+                dialog: dialog,
+                ts: data['ts']
+            }, receive);
+        }
+    }
+    function receive_first(data, status){
+        chat_box.innerHTML += `<div id="${data['ts']}" style="color: #ff3333">
+                                    <span style="font-weight: bold">AI:</span>
+                                    ${data['reply']}
+                                </div>
+                              `;
+
+        dialog = data['dialog'];
+        if (!data['end']) {
+                $.post("/chat",{
+                dialog: dialog,
+                ts: data['ts']
+            }, receive);
+        }
+    }
+    function send(){
+            let text_input = $("#text-input")[0];
+
+            chat_box.innerHTML += `<div style="color: #00aa22">
+                                        <span style="font-weight: bold">You:</span>
+                                        ${text_input.value}
+                                    </div>
+                                  `;
+            dialog += `<|prompter|>${text_input.value}<|endoftext|><|assistant|>`;
+
+            $.post("/chat",{
+                dialog: dialog,
+                ts: new Date().getTime()
+            }, receive_first);
+
+            text_input.value = '';
+        }
+
+    $(document).ready(function() {
+        $("#send").click(send);
+        $("#text-input").keyup(function (e) {
+            if (e.keyCode === 13) send();
+        });
+    })
+  </script>
+</body>
+</html> 
