@@ -1,4 +1,6 @@
 import os
+
+import torch
 import tqdm
 
 os.environ['HF_DATASETS_CACHE'] = "cache"
@@ -6,7 +8,7 @@ os.environ['HUGGINGFACE_HUB_CACHE '] = "cache"
 os.environ['TRANSFORMERS_CACHE'] = "cache"
 os.environ['CUDA_VISIBLE_DEVICES'] = "3"
 
-from torch import nn
+from torch import nn, randn
 from transformers import TrainingArguments, Trainer, logging
 from transformers import AutoModelForCausalLM
 from transformers import AutoTokenizer
@@ -16,15 +18,20 @@ from torch.utils.data.dataloader import DataLoader
 
 from Train.data import Zhihu
 
+from MainModel import MainModelForCausalLM, config, bloom_model, bloom_tokenizer
 
-tokenizer = AutoTokenizer.from_pretrained("/home/nlper_data/kuangzh/models/YeungNLP/firefly-1b4")
-model = AutoModelForCausalLM.from_pretrained("/home/nlper_data/kuangzh/models/YeungNLP/firefly-1b4").to("cuda")
+model = MainModelForCausalLM(config).cuda()
+model.load_from_bloom(bloom_model, bloom_tokenizer, 0.001)
+tokenizer = AutoTokenizer.from_pretrained("AIBoxTokenizer")
+
+# tokenizer = AutoTokenizer.from_pretrained("/home/nlper_data/kuangzh/models/YeungNLP/firefly-1b4")
+# model = AutoModelForCausalLM.from_pretrained("/home/nlper_data/kuangzh/models/YeungNLP/firefly-1b4").to("cuda")
 
 logging.set_verbosity_error()
 
-
 def preprocess(row):
-    input_texts = [t1 + t2 for t1, t2 in zip(row["title"], row['response'])]
+    # input_texts = [t1 + t2 for t1, t2 in zip(row["title"], row['response'])]
+    input_texts = ["<|prompter|>" + t1 + "<|end|><|assistant|>" + t2 + "<|end|>" for t1, t2 in zip(row["title"], row['response'])]
     return tokenizer(input_texts, truncation=True, padding=True, max_length=512, return_tensors="pt")
 
 
@@ -47,7 +54,7 @@ default_args = {
     "report_to": "none",
     "learning_rate": 1e-6,
     "gradient_accumulation_steps": 16,
-    "per_device_train_batch_size": 8,
+    "per_device_train_batch_size": 1,
     "gradient_checkpointing": True
 }
 
@@ -65,10 +72,11 @@ adam_bnb_optim = bnb.optim.Adam8bit(
 )
 model, optimizer, dataloader = accelerator.prepare(model, adam_bnb_optim, dataloader)
 
-
+cross_length = 10
 model.train()
 p_bar = tqdm.tqdm(dataloader)
 for step, batch in enumerate(p_bar, start=1):
+    model._cross_input = randn((batch['input_ids'].shape[0], cross_length, 512)).to(model.device)
     outputs = model(**batch).loss
     loss = compute_loss(batch, outputs)
     loss = loss / training_args.gradient_accumulation_steps
@@ -77,3 +85,5 @@ for step, batch in enumerate(p_bar, start=1):
     if step % training_args.gradient_accumulation_steps == 0:
         optimizer.step()
         optimizer.zero_grad()
+
+torch.save(model.state_dict(), "./state.pkl")

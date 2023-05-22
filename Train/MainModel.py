@@ -17,8 +17,7 @@ from transformers.models.bloom.modeling_bloom import (
 )
 from transformers import AutoTokenizer, AutoModelForCausalLM, AutoConfig
 
-
-tokenizer = AutoTokenizer.from_pretrained("/home/nlper_data/kuangzh/models/YeungNLP/firefly-1b4")
+bloom_tokenizer = AutoTokenizer.from_pretrained("/home/nlper_data/kuangzh/models/YeungNLP/firefly-1b4")
 bloom_model = AutoModelForCausalLM.from_pretrained("/home/nlper_data/kuangzh/models/YeungNLP/firefly-1b4", device_map="auto", torch_dtype=torch.float16).to("cuda")
 config = bloom_model.config
 
@@ -119,16 +118,16 @@ class MainModelAttention(nn.Module):
 class MainModelBlock(BloomBlock):
     def __init__(self, config: BloomConfig):
         super().__init__(config)
-        self.lora_input = nn.Linear(config.hidden_size, config.hidden_size // 8)
-        self.lora_output = nn.Linear(config.hidden_size // 8, config.hidden_size)
-        self.lora_gelu = BloomGelu()
+        # self.lora_input = nn.Linear(config.hidden_size, config.hidden_size // 8)
+        # self.lora_output = nn.Linear(config.hidden_size // 8, config.hidden_size)
+        # self.lora_gelu = BloomGelu()
         # self.cross_mlp = BloomMLP(config)
-        self.cross_layernorm = LayerNorm(config.hidden_size, eps=config.layer_norm_epsilon)
-        self.cross_attention = nn.MultiheadAttention(config.hidden_size, config.num_attention_heads, batch_first=True)
 
-        # 初始化权重
-        # nn.init.normal_(self.lora_input.weight, mean=0, std=0)
-        # nn.init.normal_(self.lora_output.weight, mean=0, std=0)
+        self.cross_layernorm = LayerNorm(config.hidden_size, eps=config.layer_norm_epsilon)
+
+        self.l1 = nn.Sequential(nn.Linear(config.hidden_size, 512), BloomGelu())
+        self.cross_attention = nn.MultiheadAttention(512, 8, batch_first=True)
+        self.l2 = nn.Sequential(BloomGelu(), nn.Linear(512, config.hidden_size))
 
     def forward(
             self,
@@ -142,9 +141,6 @@ class MainModelBlock(BloomBlock):
             output_attentions: bool = False,
     ):
         # hidden_states: [batch_size, seq_length, hidden_size]
-
-        lora_hidden = self.lora_input(hidden_states)
-        lora_res = self.lora_output(self.lora_gelu(lora_hidden))
 
         # Layer norm at the beginning of the transformer layer.
         layernorm_output = self.input_layernorm(hidden_states)
@@ -174,7 +170,9 @@ class MainModelBlock(BloomBlock):
         layernorm_output = self.post_attention_layernorm(attention_output)
 
         # 添加cross attention的调用
-        cross_attention_output, _ = self.cross_attention(hidden_states, cross_hidden_states, cross_hidden_states)
+        cross_attention_query = self.l1(hidden_states)
+        cross_attention_output_before_l2, _ = self.cross_attention(cross_attention_query, cross_hidden_states, cross_hidden_states)
+        cross_attention_output = self.l2(cross_attention_output_before_l2)
         cross_attention_layernorm_output = self.cross_layernorm(cross_attention_output)
 
 
@@ -193,7 +191,10 @@ class MainModelBlock(BloomBlock):
 
         # # mlp
         # cross_mlp_output = self.cross_mlp(cross_attention_layernorm_output, cross_residual)
-        output += lora_res
+
+        # lora_hidden = self.lora_input(hidden_states)
+        # lora_res = self.lora_output(self.lora_gelu(lora_hidden))
+        # output += lora_res
 
 
 
@@ -224,29 +225,37 @@ class MainModel(BloomModel):
         # Initialize weights and apply final processing
         self.post_init()
 
+
     def load_from_bloom(self, bloom_model, init_std=0.0):
         match_res = self.load_state_dict(bloom_model.state_dict(), strict=False)
         warnings.warn("Load Result:")
         print(match_res)
         # 初始化lora层
         for block in self.h:
-            nn.init.normal_(block.lora_input.weight, mean=0, std=init_std)
-            nn.init.normal_(block.lora_output.weight, mean=0, std=init_std)
-            # 初始化偏置
-            nn.init.zeros_(block.lora_input.bias)
-            nn.init.zeros_(block.lora_output.bias)
+            # nn.init.normal_(block.lora_input.weight, mean=0, std=init_std)
+            # nn.init.normal_(block.lora_output.weight, mean=0, std=init_std)
+            # # 初始化偏置
+            # nn.init.constant_(block.lora_input.bias, init_std)
+            # nn.init.constant_(block.lora_output.bias, init_std)
 
             # nn.init.xavier_uniform_(block.cross_attention.in_proj_weight)
             # nn.init.xavier_uniform_(block.cross_attention.out_proj.weight)
             nn.init.normal_(block.cross_attention.in_proj_weight, mean=0, std=init_std)
             nn.init.normal_(block.cross_attention.out_proj.weight, mean=0, std=init_std)
-            nn.init.constant_(block.cross_attention.in_proj_bias, 0)
-            nn.init.constant_(block.cross_attention.out_proj.bias, 0)
+            nn.init.constant_(block.cross_attention.in_proj_bias, init_std)
+            nn.init.constant_(block.cross_attention.out_proj.bias, init_std)
+
+            nn.init.normal_(block.l1[0].weight, mean=0, std=init_std)
+            nn.init.constant_(block.l1[0].bias, init_std)
+
+            nn.init.normal_(block.l2[1].weight, mean=0, std=init_std)
+            nn.init.constant_(block.l2[1].bias, init_std)
 
             # nn.init.normal_(block.cross_mlp.dense_h_to_4h.weight, mean=0, std=init_std)
             # nn.init.normal_(block.cross_mlp.dense_4h_to_h.weight, mean=0, std=init_std)
             # nn.init.zeros_(block.cross_mlp.dense_h_to_4h.bias)
             # nn.init.zeros_(block.cross_mlp.dense_4h_to_h.bias)
+
 
     def forward(
             self,
@@ -397,9 +406,35 @@ class MainModelForCausalLM(BloomForCausalLM):
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
         self.post_init()
 
-    def load_from_bloom(self, bloom_causal_lm_model, init_std=0.0):
+    def init_tokenizer(self, tokenizer):
+        new_tokens = ["<|prompter|>", "<|assistant|>", "<|call|>", "<|end|>", "<|endofcall|>"]
+        # 交集为空
+        assert len(set(new_tokens) & set(tokenizer.vocab.keys())) == 0
+        tokenizer.add_tokens(new_tokens)
+
+        # 获取<s>和new_token的索引
+        bos_index = tokenizer.convert_tokens_to_ids('<s>')
+        prompter_index = tokenizer.convert_tokens_to_ids('<|prompter|>')
+        assistant_index = tokenizer.convert_tokens_to_ids("<|assistant|>")
+
+        eos_index = tokenizer.convert_tokens_to_ids('</s>')
+        end_index = tokenizer.convert_tokens_to_ids('<|end|>')
+
+        self.resize_token_embeddings(len(tokenizer))
+
+        # 将<s>的embedding迁移到new_token
+        self.transformer.word_embeddings.weight.data[prompter_index] = self.transformer.word_embeddings.weight.data[
+            bos_index].clone()
+        self.transformer.word_embeddings.weight.data[end_index] = self.transformer.word_embeddings.weight.data[
+            eos_index].clone()
+        self.transformer.word_embeddings.weight.data[assistant_index] = self.transformer.word_embeddings.weight.data[
+            eos_index].clone()
+        return tokenizer
+
+    def load_from_bloom(self, bloom_causal_lm_model, tokenizer, init_std=0.0):
         self.transformer.load_from_bloom(bloom_causal_lm_model.transformer, init_std)
         self.lm_head.load_state_dict(bloom_causal_lm_model.lm_head.state_dict(), strict=False)
+        return self.init_tokenizer(tokenizer)
 
     def forward(
             self,
