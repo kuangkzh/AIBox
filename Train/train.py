@@ -54,7 +54,7 @@ default_args = {
     "report_to": "none",
     "learning_rate": 1e-6,
     "gradient_accumulation_steps": 16,
-    "per_device_train_batch_size": 1,
+    "per_device_train_batch_size": 8,
     "gradient_checkpointing": True
 }
 
