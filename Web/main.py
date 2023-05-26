@@ -3,15 +3,18 @@ import json
 import os
 
 from flask import Flask, render_template, request
-from utils import GPUs
-from Model import OpenAssistant
 
-import Web.chat_demo
+# from utils import GPUs
+# from Model import OpenAssistant
+
+# import Web.chat_demo
 
 # GPUs.init_gpu()
 basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__)
-app.register_blueprint(Web.chat_demo.app)
+
+
+# app.register_blueprint(Web.chat_demo.app)
 
 
 @app.route('/')
@@ -22,6 +25,21 @@ def main():
 @app.route('/feature')
 def feature():
     return render_template('feature.html')
+
+
+@app.route('/block')
+def block():
+    return render_template('block.html')
+
+
+@app.route('/chatblock')
+def chatblock():
+    return render_template('chatblock.html')
+
+
+@app.route('/pictureblock')
+def pictureblock():
+    return render_template('pictureblock.html')
 
 
 @app.route('/main')
@@ -43,12 +61,8 @@ def picture():
 @app.route('/chat', methods=['POST'])
 def chat():
     inputs = request.form['dialog']
-    dialog = OpenAssistant.forward(inputs, max_new_tokens=150)
-    # dialog = "1111"
+    # dialog = OpenAssistant.forward(inputs, max_new_tokens=150)
+    dialog = "1111"
     end = "<|endoftext|>" in dialog[len(inputs):]
     reply = dialog[len(inputs):].replace("<|endoftext|>", "")
     return {"reply": reply, "dialog": dialog, "ts": request.form['ts'], 'end': end}
-
-
-if __name__ == "__main__":
-    app.run()
