@@ -6,7 +6,7 @@ def stable_diffusion_v1_5(prompt, output_slot_id):
     model_dir = "cache/model"
 
     model_id = "runwayml/stable-diffusion-v1-5"
-    pipe = StableDiffusionPipeline.from_pretrained(model_id)
+    pipe = StableDiffusionPipeline.from_pretrained(model_id,cache_dir=model_dir)
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     pipe.to(device)
 
