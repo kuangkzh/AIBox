@@ -1,41 +1,79 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>页面框架</title>
+  <title>AI Box Online</title>
   <style>
     body {
       display: flex;
       flex-direction: row;
       height: 100vh;
       margin: 0;
+      background-color: #192A56; /* 更改背景色为深蓝色 */
+      color: white; /* 更改字体颜色为白色 */
     }
     
     #left-panel {
       flex: 3;
       display: flex;
       flex-direction: column;
+      padding: 20px; /* 添加边界空白 */
+      background-color: #192A56; /* 更改背景色为深蓝色 */
+      color: white; /* 更改字体颜色为白色 */
     }
     
     #text-dialog {
       flex-grow: 1;
       overflow-y: auto;
-      border: 1px solid black;
     }
     
     #picture-slot {
       flex-grow: 1;
-      border: 1px solid black;
+      margin-top: 20px; /* 添加上边界空白 */
     }
     
     #right-panel {
       flex: 1;
       display: flex;
       flex-direction: column;
+      background-color: #334675;
+      color: white; 
+      padding: 20px;
     }
     
     .image-box {
       flex-grow: 1;
       border: 1px solid black;
+      margin-bottom: 10px;
+    }
+    
+    #title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    
+    /* 媒体查询 */
+    @media screen and (max-width: 768px) {
+      #left-panel {
+        flex: none;
+        width: 100%;
+        padding: 0; /* 移除边界空白 */
+      }
+      
+      #text-dialog,
+      #picture-slot {
+        height: 200px;
+        margin-top: 0; /* 移除上边界空白 */
+      }
+      
+      #right-panel {
+        flex: none;
+        width: 100%;
+      }
+      
+      .image-box {
+        height: 100px;
+      }
     }
   </style>
 </head>
@@ -43,19 +81,21 @@
   <div id="left-panel">
     <div id="text-dialog">
       <iframe 
-      width="1200"
-      height="460"
-      src="/chatblock"></iframe>
+      width="90%"
+      height="80%"
+      src="/chat_demo"></iframe>
     </div>
     <div id="picture-slot">
       <iframe 
-      width="1200"
-      height="240"
+      width="90%"
+      height="80%"
       src="/pictureblock"></iframe>
     </div>
   </div>
   <div id="right-panel">
-    <img src="../../cache/fileslots/10.png" width="300" height="250">
+    <div id="title">输出图片展示区</div>
+    <div class="image-box"><img src="../../cache/fileslots/10.png"></div>
+    <div class="image-box"></div>
   </div>
 </body>
 </html>

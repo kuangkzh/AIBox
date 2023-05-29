@@ -1,73 +1,170 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-	<meta charset="UTF-8">
-	<title>Login</title>
-	<style>
-		body {
-			background-color: #000;
-			color: #fff;
-			font-family: Arial, sans-serif;
-			font-size: 18px;
-			line-height: 1.5;
-			padding: 50px;
-			text-align: center;
-		}
-css
-Copy code
-	h1 {
-		font-size: 36px;
-		margin-top: 0;
-	}
-
-	form {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		margin-top: 50px;
-	}
-
-	input[type="text"], input[type="password"] {
-		background-color: transparent;
-		border: none;
-		border-bottom: 2px solid #fff;
-		color: #fff;
-		font-size: 18px;
-		margin-bottom: 20px;
-		padding: 10px;
-		width: 100%;
-	}
-
-	input[type="submit"] {
-		background-color: #fff;
-		border: none;
-		color: #000;
-		cursor: pointer;
-		font-size: 18px;
-		font-weight: bold;
-		padding: 10px 30px;
-		text-transform: uppercase;
-	}
-
-	input[type="submit"]:hover {
-		background-color: #000;
-		color: #fff;
-		transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
-	}
-
-</style>
+  <title>页面框架</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      margin: 0;
+    }
+    
+    #left-panel {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    #text-dialog {
+      flex-grow: 1;
+      overflow-y: auto;
+      border: 1px solid black;
+    }
+    
+    #picture-slot {
+      flex-grow: 1;
+      border: 1px solid black;
+    }
+    
+    #right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #f2f2f2;
+      padding: 20px;
+    }
+    
+    .image-box {
+      flex-grow: 1;
+      border: 1px solid black;
+      margin-bottom: 10px;
+    }
+    
+    #title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    
+    /* 媒体查询 */
+    @media screen and (max-width: 768px) {
+      #left-panel {
+        flex: none;
+        width: 100%;
+      }
+      
+      #text-dialog,
+      #picture-slot {
+        height: 200px;
+      }
+      
+      #right-panel {
+        flex: none;
+        width: 100%;
+      }
+      
+      .image-box {
+        height: 100px;
+      }
+    }
+  </style>
+</head>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>页面框架</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      margin: 0;
+    }
+    
+    #left-panel {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      padding: 20px; /* 添加边界空白 */
+    }
+    
+    #text-dialog {
+      flex-grow: 1;
+      overflow-y: auto;
+      border: 1px solid black;
+    }
+    
+    #picture-slot {
+      flex-grow: 1;
+      border: 1px solid black;
+      margin-top: 20px; /* 添加上边界空白 */
+    }
+    
+    #right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #f2f2f2;
+      padding: 20px;
+    }
+    
+    .image-box {
+      flex-grow: 1;
+      border: 1px solid black;
+      margin-bottom: 10px;
+    }
+    
+    #title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    
+    /* 媒体查询 */
+    @media screen and (max-width: 768px) {
+      #left-panel {
+        flex: none;
+        width: 100%;
+        padding: 0; /* 移除边界空白 */
+      }
+      
+      #text-dialog,
+      #picture-slot {
+        height: 200px;
+        margin-top: 0; /* 移除上边界空白 */
+      }
+      
+      #right-panel {
+        flex: none;
+        width: 100%;
+      }
+      
+      .image-box {
+        height: 100px;
+      }
+    }
+  </style>
 </head>
 <body>
-	<h1>Login</h1>
-	<form>
-		<label for="username">Username:</label>
-		<input type="text" id="username" name="username" required>
-bash
-Copy code
-	<label for="password">Password:</label>
-	<input type="password" id="password" name="password" required>
-
-	<input type="submit" value="Login">
-</form>
+  <div id="left-panel">
+    <div id="text-dialog">
+      <iframe 
+      width="100%"
+      height="100%"
+      src="/chatblock"></iframe>
+    </div>
+    <div id="picture-slot">
+      <iframe 
+      width="100%"
+      height="100%"
+      src="/pictureblock"></iframe>
+    </div>
+  </div>
+  <div id="right-panel">
+    <div id="title">页面美化示例</div>
+    <div class="image-box"></div>
+    <div class="image-box"></div>
+  </div>
 </body>
 </html>
