@@ -3,8 +3,8 @@ def get_response(input_str: str):
     res = ""
     if input_str == "6的阶乘是多少？":
         res = "<|call|>[python](\"6*5*4*3*2*1\")<|end|>"
-    elif input_str == "请生成一张大海的图片":
-        res = "好的，下面是一张大海的图片。\n<|call|>[stable-diffusion-v1-5](\"sea\", 10)<|end|>"
+    elif input_str == "请生成一张日落的图片":
+        res = "好的，下面是一张日落的图片。\n<|call|>[stable-diffusion-v1-5](\"sunset\", 10)<|end|>"
     elif input_str == "请概括这张图片的内容。":
         res = "好的。\n<|call|>[vit-gpt2-image-captioning](10)<|end|>"
     elif input_str == "床的颜色是什么":
