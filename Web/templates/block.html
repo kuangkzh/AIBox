@@ -31,17 +31,22 @@
       flex: 1;
       display: flex;
       flex-direction: column;
+      background-color: #f2f2f2;
+      padding: 20px;
     }
+    
+    .image-box {
+      flex-grow: 1;
+      border: 1px solid black;
+      margin-bottom: 10px;
+    }
+    
     #title {
       font-size: 24px;
       font-weight: bold;
       margin-bottom: 20px;
     }
     
-    .image-box {
-      flex-grow: 1;
-      border: 1px solid black;
-    }
     /* 媒体查询 */
     @media screen and (max-width: 768px) {
       #left-panel {
@@ -52,6 +57,82 @@
       #text-dialog,
       #picture-slot {
         height: 200px;
+      }
+      
+      #right-panel {
+        flex: none;
+        width: 100%;
+      }
+      
+      .image-box {
+        height: 100px;
+      }
+    }
+  </style>
+</head>
+<!DOCTYPE html>
+<html>
+<head>
+  <title>页面框架</title>
+  <style>
+    body {
+      display: flex;
+      flex-direction: row;
+      height: 100vh;
+      margin: 0;
+    }
+    
+    #left-panel {
+      flex: 3;
+      display: flex;
+      flex-direction: column;
+      padding: 20px; /* 添加边界空白 */
+    }
+    
+    #text-dialog {
+      flex-grow: 1;
+      overflow-y: auto;
+      border: 1px solid black;
+    }
+    
+    #picture-slot {
+      flex-grow: 1;
+      border: 1px solid black;
+      margin-top: 20px; /* 添加上边界空白 */
+    }
+    
+    #right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #f2f2f2;
+      padding: 20px;
+    }
+    
+    .image-box {
+      flex-grow: 1;
+      border: 1px solid black;
+      margin-bottom: 10px;
+    }
+    
+    #title {
+      font-size: 24px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+    
+    /* 媒体查询 */
+    @media screen and (max-width: 768px) {
+      #left-panel {
+        flex: none;
+        width: 100%;
+        padding: 0; /* 移除边界空白 */
+      }
+      
+      #text-dialog,
+      #picture-slot {
+        height: 200px;
+        margin-top: 0; /* 移除上边界空白 */
       }
       
       #right-panel {
@@ -81,8 +162,8 @@
     </div>
   </div>
   <div id="right-panel">
-    <div id="title">输出图片展示区</div>
-    <div class="image-box" src="../../cache/fileslots/10.png"></div>
+    <div id="title">页面美化示例</div>
+    <div class="image-box"></div>
     <div class="image-box"></div>
   </div>
 </body>
