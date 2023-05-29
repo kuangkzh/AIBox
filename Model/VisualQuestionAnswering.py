@@ -19,4 +19,4 @@ def visual_question_answer(prompt,input_slot_id):
     outputs = model(**encoding)
     logits = outputs.logits
     idx = logits.argmax(-1).item()
-    print("Predicted answer:", model.config.id2label[idx])
+    return(model.config.id2label[idx])

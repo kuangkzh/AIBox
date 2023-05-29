@@ -14,4 +14,4 @@ def stable_diffusion_v1_5(prompt, output_slot_id):
         
     image.save(f"./cache/fileslots/{output_slot_id}.png")
 
-    return image
+    return f"./cache/fileslots/{output_slot_id}.png"
