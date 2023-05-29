@@ -8,24 +8,22 @@ class Controller:
             return "Failed to find a proper model."
         
         if self.model_name == "vit-gpt2-image-captioning":
-            return(ImageCaptioning.vit_gpt2_image_captioning(self.model_args))
+            return (ImageCaptioning.vit_gpt2_image_captioning(self.model_args)[0])
         if self.model_name == "whisper-base":
-            return(SpeechRecognition.whisper_base(*self.model_args))
+            return (SpeechRecognition.whisper_base(*self.model_args))
         if self.model_name == "stable-diffusion-v1-5":
-            return(TextToImage.stable_diffusion_v1_5(*self.model_args))
+            return (TextToImage.stable_diffusion_v1_5(*self.model_args))
         if self.model_name == "text-to-video-ms-1.7b":
-            return(TextToVideo.text_to_video(*self.model_args))
+            return (TextToVideo.text_to_video(*self.model_args))
         if self.model_name == "vilt-b32-finetuned-vqa":
-            return(VisualQuestionAnswering.visual_question_answer(*self.model_args))
+            return (VisualQuestionAnswering.visual_question_answer(*self.model_args))
         if self.model_name == "python":
-            return(eval(self.model_args[0]))
+            return (eval(self.model_args[0]))
         
         # return("model name: {}; model args: {}.".format(self.model_name, self.model_args))
   
         
     def explain(self, input_str):
-        result_pos = input_str.find('<|endofargs|>')
-        end_pos = input_str.find('<|endofcall|>')
         
         start_pos = input_str.find('<|call|>')
         if start_pos < 0: 
@@ -58,7 +56,9 @@ class Controller:
         return 1
         
 
-  
+
 if __name__ == "__main__":
     controller = Controller() 
-    print(controller("<|call|>[vilt-b32-finetuned-vqa](\"What is the color of the bed?\",10)<|end|>"))
+    print(controller("<|call|>[stable-diffusion-v1-5](\"sea\", 10)<|end|>./cache/fileslots/10.png<|endofcall|>"))
+    
+    
