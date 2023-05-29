@@ -12,7 +12,7 @@ from torch import nn, randn
 from transformers import TrainingArguments, Trainer, logging
 from transformers import AutoModelForCausalLM
 from transformers import AutoTokenizer
-import bitsandbytes as bnb
+from transformers import AdamW
 from accelerate import Accelerator
 from torch.utils.data.dataloader import DataLoader
 
@@ -35,7 +35,7 @@ def preprocess(row):
     return tokenizer(input_texts, truncation=True, padding=True, max_length=512, return_tensors="pt")
 
 
-dataset = Zhihu.build_dataset()
+dataset = Zhihu.build_dataset().select(range(0, 1000))
 dataset = dataset.map(preprocess, batched=True, batch_size=32, num_proc=8)
 dataset.set_format(type="torch", columns=["input_ids", "attention_mask"])
 
@@ -64,13 +64,19 @@ dataloader = DataLoader(dataset, batch_size=training_args.per_device_train_batch
 model.gradient_checkpointing_enable() if training_args.gradient_checkpointing else None
 
 accelerator = Accelerator(mixed_precision='fp16')
-adam_bnb_optim = bnb.optim.Adam8bit(
+# adam_bnb_optim = bnb.optim.Adam8bit(
+#     model.parameters(),
+#     betas=(training_args.adam_beta1, training_args.adam_beta2),
+#     eps=training_args.adam_epsilon,
+#     lr=training_args.learning_rate,
+# )
+optimizer = AdamW(
     model.parameters(),
     betas=(training_args.adam_beta1, training_args.adam_beta2),
     eps=training_args.adam_epsilon,
     lr=training_args.learning_rate,
 )
-model, optimizer, dataloader = accelerator.prepare(model, adam_bnb_optim, dataloader)
+model, optimizer, dataloader = accelerator.prepare(model, optimizer, dataloader)
 
 cross_length = 10
 model.train()
