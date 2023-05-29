@@ -8,7 +8,7 @@ def vit_gpt2_image_captioning(input_slot_ids):
   # 根据槽位号获取文件路径，文件名为槽位号+后缀
   model_dir = "cache/model"
   fileslot_dir = "./cache/fileslots/"
-  file_paths = [fileslot_dir + str(sl_id) + '.png' for sl_id in input_slot_ids]
+  file_paths = [fileslot_dir + str(sl_id) + '.jpg' for sl_id in input_slot_ids]
   
   # 以下是从huggingface上复制的调用示例代码
   model = VisionEncoderDecoderModel.from_pretrained("nlpconnect/vit-gpt2-image-captioning", cache_dir=model_dir)
