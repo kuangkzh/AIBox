@@ -1,8 +1,8 @@
 import re
 import json
 import os
-
-from flask import Flask, render_template, request
+import requests
+from flask import Flask, render_template, request, Blueprint
 
 # from utils import GPUs
 # from Model import OpenAssistant
@@ -11,6 +11,7 @@ from flask import Flask, render_template, request
 
 # GPUs.init_gpu()
 basedir = os.path.abspath(os.path.dirname(__file__))
+#app = Blueprint("chat", __name__)
 app = Flask(__name__)
 
 
@@ -61,8 +62,19 @@ def picture():
 @app.route('/chat', methods=['POST'])
 def chat():
     inputs = request.form['dialog']
-    # dialog = OpenAssistant.forward(inputs, max_new_tokens=150)
-    dialog = "1111"
+    dialog = OpenAssistant.forward(inputs, max_new_tokens=150)
+    #dialog = "1111"
     end = "<|endoftext|>" in dialog[len(inputs):]
     reply = dialog[len(inputs):].replace("<|endoftext|>", "")
     return {"reply": reply, "dialog": dialog, "ts": request.form['ts'], 'end': end}
+
+#@app.route("/chat_demo")
+#def chat_demo():
+#    return render_template("chat_demo.html")
+
+
+#@app.route("/chat_api", methods=['POST'])
+#def chat_api():
+#    message = request.form['message']
+#    res = requests.post("http://210.28.134.55:19888/chat", {"prompt": message}).json()
+#    return res
